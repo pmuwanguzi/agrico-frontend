@@ -74,18 +74,18 @@ const RootStack = createNativeStackNavigator({
         },
       },
     },
-    // AuthScreen: {
-    //   screen: AuthScreen,
-    //   options: {
-    //     title: 'Login',
-    //     headerShown: false,
-    //   },},
-      // DashboardScreen: {
-      //   screen: DashboardScreen,
-      //   options: {
-      //     title: 'Dashboard',
-      //     headerShown: false,
-      //   },},
+    AuthScreen: {
+      screen: AuthScreen,
+      options: {
+        title: 'Login',
+        headerShown: false,
+      },},
+      DashboardScreen: {
+        screen: DashboardScreen,
+        options: {
+          title: 'Dashboard',
+          headerShown: false,
+        },},
     Settings: {
       screen: Settings,
       options: ({ navigation }) => ({
