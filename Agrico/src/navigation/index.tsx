@@ -1,5 +1,3 @@
-import AuthScreen from './screens/AuthScreen';
-import DashboardScreen from './screens/DashboardScreen';
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { HeaderButton, Text } from '@react-navigation/elements';
@@ -16,13 +14,16 @@ import { Profile } from './screens/Profile';
 import { Settings } from './screens/Settings';
 import { Updates } from './screens/Updates';
 import { NotFound } from './screens/NotFound';
+import AuthScreen from './screens/AuthScreen';
+import DashboardScreen from './screens/DashboardScreen';
 
+// Bottom Tabs
 const HomeTabs = createBottomTabNavigator({
   screens: {
-    Home: {
-      screen: Home,
+    DashboardScreen: {
+      screen: DashboardScreen,
       options: {
-        title: 'Feed',
+        title: 'Dashboard',
         tabBarIcon: ({ color, size }) => (
           <Image
             source={newspaper}
