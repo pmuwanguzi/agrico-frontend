@@ -1,7 +1,13 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const DashboardScreen = ({ navigation }) => {
+    const handleLogout =async ()=>{
+        await AsyncStorage.removeItem("userToken");
+        navigation.replace('Auth');
+    };
     return (
         <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.header}>Farm Dashboard</Text>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Picker, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AuthScreen = ({ navigation }) => {
     const [fullName, setFullName] = useState('');
@@ -8,26 +9,28 @@ const AuthScreen = ({ navigation }) => {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('farmer');
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         // TODO: handle login logic
-        navigation.navigate('Dashboard');
+        await AsyncStorage.setItem("userToken", "dummy_token");
+        navigation.replace('Dashboard');
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         // TODO: handle registration logic
-        navigation.navigate('Dashboard');
+        await AsyncStorage.setItem("userToken", "dummy_token");
+        navigation.replace('Dashboard');
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Farm Management Login</Text>
             {/* Registration Inputs */}
-            <TextInput
-                placeholder="Full Name"
-                style={styles.input}
-                value={fullName}
-                onChangeText={setFullName}
-            />
+            {/*<TextInput*/}
+            {/*    placeholder="Full Name"*/}
+            {/*    style={styles.input}*/}
+            {/*    value={fullName}*/}
+            {/*    onChangeText={setFullName}*/}
+            {/*/>*/}
             <TextInput
                 placeholder="Email"
                 keyboardType="email-address"
@@ -36,13 +39,13 @@ const AuthScreen = ({ navigation }) => {
                 onChangeText={setEmail}
                 autoCapitalize="none"
             />
-            <TextInput
-                placeholder="Phone Number"
-                keyboardType="phone-pad"
-                style={styles.input}
-                value={phone}
-                onChangeText={setPhone}
-            />
+            {/*<TextInput*/}
+            {/*    placeholder="Phone Number"*/}
+            {/*    keyboardType="phone-pad"*/}
+            {/*    style={styles.input}*/}
+            {/*    value={phone}*/}
+            {/*    onChangeText={setPhone}*/}
+            {/*/>*/}
             <TextInput
                 placeholder="Password"
                 secureTextEntry
@@ -50,15 +53,15 @@ const AuthScreen = ({ navigation }) => {
                 value={password}
                 onChangeText={setPassword}
             />
-            <Picker
-                selectedValue={role}
-                style={styles.picker}
-                onValueChange={(itemValue) => setRole(itemValue)}
-            >
-                <Picker.Item label="Farmer" value="farmer" />
-                <Picker.Item label="Farm Manager" value="manager" />
-                <Picker.Item label="Admin" value="admin" />
-            </Picker>
+            {/*<Picker*/}
+            {/*    selectedValue={role}*/}
+            {/*    style={styles.picker}*/}
+            {/*    onValueChange={(itemValue) => setRole(itemValue)}*/}
+            {/*>*/}
+            {/*    <Picker.Item label="Farmer" value="farmer" />*/}
+            {/*    <Picker.Item label="Farm Manager" value="manager" />*/}
+            {/*    <Picker.Item label="Admin" value="admin" />*/}
+            {/*</Picker>*/}
             <View style={styles.buttonContainer}>
                 <Button title="Login" onPress={handleLogin} />
                 <Button title="Register" onPress={handleRegister} />

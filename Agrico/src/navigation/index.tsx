@@ -111,12 +111,62 @@ const RootStack = createNativeStackNavigator({
   },
 });
 
-export const Navigation = createStaticNavigation(RootStack);
+// export const Navigation = createStaticNavigation(RootStack);
 
-type RootStackParamList = StaticParamList<typeof RootStack>;
+// Conditional Navigation Wrapper:
+export const Navigation=({theme, linking, onReady})=> {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      setIsLoggedIn(!!token);
+      setIsLoading(false);
+    };
+    checkLogin();
+  }, []);
+  if (isLoading) {
+    return (
+        <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+          <ActivityIndicator size="large"/>
+        </View>
+    );
+  }
+
+  const AppStack = createNativeStackNavigator({
+    screens: isLoggedIn
+        ? {
+          DashboardScreen: {
+            screen: DashboardScreen,
+            options: {
+              title: 'Dashboard',
+              headerShown: false,
+            }, HomeTabs: {
+              screen: HomeTabs,
+              options: {headerShown: false},
+            },
+          }
+        } : {
+          AuthScreen: {
+            screen: AuthScreen,
+            options: {headerShown: false},
+          },
+        },
+  });
+
+  const AppNavigation = createStaticNavigation(AppStack)
+
+
+  type RootStackParamList = StaticParamList<typeof RootStack>;
+
+  return (
+      <AppNavigation theme={theme} linking={linking} onReady={onReady}/>
+  );
+}
 declare global {
   namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
+    interface RootParamList extends RootStackParamList {
+    }
   }
 }
