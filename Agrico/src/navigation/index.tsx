@@ -61,7 +61,7 @@ const MyStack = createNativeStackNavigator({
       }
     },
     Common:{
-      navigationKey: true ? "user" : "guest",
+      navigationKey: "user",
       screens:{
         NotFound: {
           screen: NotFound,
