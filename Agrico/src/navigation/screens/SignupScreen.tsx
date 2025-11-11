@@ -1,31 +1,36 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Picker, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from '@react-navigation/native';
 
-
-
-
-const AuthScreen = () => {
+const SignupScreen = ( ) => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('farmer');
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const navigation = useNavigation();
     const handleLogin = async () => {
-        // TODO: handle login logic
+    //     // TODO: handle login logic
         await AsyncStorage.setItem("userToken", "dummy_token");
         navigation.replace('Dashboard');
     };
 
+    const handleRegister = async () => {
+        // TODO: handle registration logic
+        await AsyncStorage.setItem("userToken", "dummy_token");
+        navigation.replace('Dashboard');
+    };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Farm Management Login</Text>
+            <Text style={styles.title}>Farm Management SignUp</Text>
 
+            <TextInput
+                placeholder="Full Name"
+                style={styles.input}
+                value={fullName}
+                onChangeText={setFullName}
+            />
             <TextInput
                 placeholder="Email"
                 keyboardType="email-address"
@@ -34,7 +39,13 @@ const AuthScreen = () => {
                 onChangeText={setEmail}
                 autoCapitalize="none"
             />
-
+            <TextInput
+                placeholder="Phone Number"
+                keyboardType="phone-pad"
+                style={styles.input}
+                value={phone}
+                onChangeText={setPhone}
+            />
             <TextInput
                 placeholder="Password"
                 secureTextEntry
@@ -42,10 +53,18 @@ const AuthScreen = () => {
                 value={password}
                 onChangeText={setPassword}
             />
-
+            {/*<Picker*/}
+            {/*    selectedValue={role}*/}
+            {/*    style={styles.picker}*/}
+            {/*    onValueChange={(itemValue) => setRole(itemValue)}*/}
+            {/*>*/}
+            {/*    <Picker.Item label="Farmer" value="farmer" />*/}
+            {/*    <Picker.Item label="Farm Manager" value="manager" />*/}
+            {/*    <Picker.Item label="Admin" value="admin" />*/}
+            {/*</Picker>*/}
             <View style={styles.buttonContainer}>
-                <Button title="Login" onPress={handleLogin} />
-                <Button title="Register" onPress={()=> navigation.navigate("SignupScreen")} />
+                {/*<Button title="Login" onPress={handleLogin} />*/}
+                <Button title="Register" onPress={handleRegister} />
             </View>
         </View>
     );
@@ -59,4 +78,4 @@ const styles = StyleSheet.create({
     buttonContainer: { flexDirection: 'row', justifyContent: 'space-around' },
 });
 
-export default AuthScreen;
+export default SignupScreen;

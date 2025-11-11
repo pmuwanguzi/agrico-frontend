@@ -3,7 +3,7 @@ import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const DashboardScreen = ({ navigation }) => {
+const DashboardScreen = ( ) => {
     const handleLogout =async ()=>{
         await AsyncStorage.removeItem("userToken");
         navigation.replace('Auth');
@@ -46,7 +46,7 @@ const DashboardScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 20 },
+    container: { padding: 20, paddingTop: 80 },
     header: { fontSize: 26, fontWeight: 'bold', marginBottom: 20, textAlign: 'center' },
     summaryRow: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
     summaryBox: {

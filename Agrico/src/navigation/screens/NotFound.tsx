@@ -5,7 +5,10 @@ export function NotFound() {
   return (
     <View style={styles.container}>
       <Text>404</Text>
-      <Button screen="HomeTabs">Go to Home</Button>
+      {/*<Button screen="HomeTabs">Go to Home</Button>*/}
+      <Text>Please check your internet connection </Text>
+      <Text>then try to close and reopen the app.</Text>
+      <Text>or try again later</Text>
     </View>
   );
 }

@@ -10,7 +10,10 @@
     "scheme": "agrico",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.agrico"
+      "bundleIdentifier": "com.agrico",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +34,11 @@
           "image": "./assets/splash-icon.png"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "bee873e4-2a11-454f-8ca5-8b4d7b9b8cb2"
+      }
+    }
   }
 }
