@@ -3,7 +3,7 @@ import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
-const DashboardScreen = ( ) => {
+const DashboardScreen = ({navigation}:{navigation:any}) => {
     const handleLogout =async ()=>{
         await AsyncStorage.removeItem("userToken");
         navigation.replace('Auth');
