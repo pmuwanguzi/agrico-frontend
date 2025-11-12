@@ -18,7 +18,7 @@ const SignupScreen = ( ) => {
     const handleRegister = async () => {
         // TODO: handle registration logic
         await AsyncStorage.setItem("userToken", "dummy_token");
-        navigation.replace('Dashboard');
+        // navigation.replace('Dashboard');
     };
 
     return (

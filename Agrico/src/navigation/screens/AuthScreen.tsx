@@ -23,7 +23,7 @@ const AuthScreen = () => {
 
             if (result.status === 200) {
                 // Save token and update global login state
-                await login(result.data.access_token);
+                login(result.data.access_token);
                 // alert("Login Successful");
             } else {
                 alert("Invalid credentials. Please try again or register an account.");
