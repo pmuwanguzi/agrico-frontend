@@ -1,24 +1,53 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Picker, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { Picker } from '@react-native-picker/picker';
 
 const SignupScreen = ( ) => {
     const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
+    const [password1, setPassword1] = useState('');
+    const [password2, setPassword2] = useState('');
     const [role, setRole] = useState('farmer');
 
-    const handleLogin = async () => {
-    //     // TODO: handle login logic
-        await AsyncStorage.setItem("userToken", "dummy_token");
-        navigation.replace('Dashboard');
+
+    const isValidEmail = (value) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(value);
+    };
+    // Only allowing rwanda phone numbers
+    const isValidPhone = (phone) => {
+        const regex = /^(?:\+?250)?0?7[2389]\d{7}$/;
+        return regex.test(phone);
     };
 
     const handleRegister = async () => {
         // TODO: handle registration logic
-        await AsyncStorage.setItem("userToken", "dummy_token");
-        // navigation.replace('Dashboard');
+       if(!isValidEmail(email)) {
+           alert("Please enter a valid Email");
+           return;
+       } else {
+           if (!isValidPhone(phone)) {
+               alert("Please enter a Rwanda valid Phone Number");
+           }else{
+               if (!fullName || !email || !phone || !password1 || !password2) {
+                   alert("Please enter all the fields");
+
+               }else{
+                   if (password1 !== password2) {
+                       alert("Passwords do not match");
+                   }else{
+                       alert("Registration Successful");
+                   }
+               }
+           }
+
+       }
+
+
+
+
     };
 
     return (
@@ -50,13 +79,20 @@ const SignupScreen = ( ) => {
                 placeholder="Password"
                 secureTextEntry
                 style={styles.input}
-                value={password}
-                onChangeText={setPassword}
+                value={password1}
+                onChangeText={setPassword1}
+            />
+            <TextInput
+                placeholder="Password"
+                secureTextEntry
+                style={styles.input}
+                value={password2}
+                onChangeText={setPassword2}
             />
             {/*<Picker*/}
             {/*    selectedValue={role}*/}
-            {/*    style={styles.picker}*/}
             {/*    onValueChange={(itemValue) => setRole(itemValue)}*/}
+            {/*    style={{ width: '100%' }}*/}
             {/*>*/}
             {/*    <Picker.Item label="Farmer" value="farmer" />*/}
             {/*    <Picker.Item label="Farm Manager" value="manager" />*/}
