@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, {useContext, useState} from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// import { Picker } from '@react-native-picker/picker';
+import {user_signup , user_login} from "../../api/user_api";
+import {AuthContext} from "../AuthContext";
+
 
 const SignupScreen = ( ) => {
     const [fullName, setFullName] = useState('');
@@ -9,9 +11,8 @@ const SignupScreen = ( ) => {
     const [phone, setPhone] = useState('');
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
-    const [role, setRole] = useState('farmer');
-
-
+    const [role, setRole] = useState('admin');
+    const { login } = useContext(AuthContext);
     const isValidEmail = (value) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(value);
@@ -23,7 +24,7 @@ const SignupScreen = ( ) => {
     };
 
     const handleRegister = async () => {
-        // TODO: handle registration logic
+        // handle registration logic
        if(!isValidEmail(email)) {
            alert("Please enter a valid Email");
            return;
@@ -38,7 +39,21 @@ const SignupScreen = ( ) => {
                    if (password1 !== password2) {
                        alert("Passwords do not match");
                    }else{
-                       alert("Registration Successful");
+
+                       const result = await user_signup({
+                           email: email.toLowerCase(),
+                           password: password1,
+                           full_name: fullName,
+                           phone: phone,
+                           role: "admin",
+                       });
+                       if(result.status === 201){
+                           alert("Registration Successful . Please continue to login screen and login");
+                       }else{
+                           alert(result.error)
+                       }
+
+
                    }
                }
            }
