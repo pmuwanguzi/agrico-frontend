@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Image } from "react-native";
 import { AuthContext } from "../AuthContext";
 import { user_login } from "../../api/user_api";
 import {useNavigation} from "@react-navigation/native";
@@ -36,7 +36,11 @@ const AuthScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Farm Management Login</Text>
+            <Image source={require("../../assets/leafy.png")} style={styles.icon}/>
+            <Text style={styles.textTop}>Welcome Back.</Text>
+
+
+            <Text style={styles.text}>Login to manage your farm efficiently.</Text>
 
             <TextInput
                 placeholder="Email"
@@ -85,4 +89,39 @@ const styles = StyleSheet.create({
         borderRadius: 5,
     },
     buttonContainer: { flexDirection: "row", justifyContent: "space-around" },
+    icon: {
+        position: 'absolute',
+        top: 131,
+        left: 168,
+        width: 54,
+        height: 54,
+        backgroundColor: ""},
+    rectangle: {
+        position: "absolute",
+        top: 118,
+        left: 155,
+        width: 80,
+        height: 80,
+        backgroundColor: "#4CAF50",
+        borderRadius: 15,
+    },text: {
+        position: "absolute",
+        top: 280,
+        left: 52,
+        fontFamily: "Inter",
+        fontSize: 16,
+        lineHeight: 24,
+        fontWeight: "400",
+        color: "#5F5F5F",
+    },textTop: {
+        position: "absolute",
+        top: 239,
+        left: 104,
+        fontFamily: "Inter",
+        fontSize: 24,
+        lineHeight: 32,
+        fontWeight: "700",
+        color: "#1A1A1A",
+    },
+
 });
