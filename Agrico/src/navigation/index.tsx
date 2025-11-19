@@ -11,6 +11,12 @@ import { NotFound } from "./screens/NotFound";
 import AuthScreen from "./screens/AuthScreen";
 import SignupScreen from "./screens/SignupScreen";
 import DashboardScreen from "./screens/DashboardScreen";
+import LivestockScreen from "./screens/LivestockScreen";
+import CropsScreen from "./screens/CropsScreen";
+import SalesScreen from "./screens/SalesScreen";
+import ExpensesScreen from "./screens/ExpensesScreen";
+import AddFarmScreen from "./screens/AddFarmScreen";
+
 
 const Tabs = createBottomTabNavigator();
 
@@ -25,9 +31,12 @@ function MyTabs() {
                 animation: "shift",
             }}
         >
-            <Tabs.Screen name="Home" component={Home} />
+            {/*<Tabs.Screen name="Home" component={Home} />*/}
             <Tabs.Screen name="Dashboard" component={DashboardScreen} />
-            <Tabs.Screen name="Settings" component={Settings} />
+            <Tabs.Screen name="Livestock" component={LivestockScreen} />
+            <Tabs.Screen name="Crops" component={CropsScreen} />
+            <Tabs.Screen name="Sales" component={SalesScreen} />
+            <Tabs.Screen name="Expenses" component={ExpensesScreen} />
         </Tabs.Navigator>
     );
 }
@@ -41,7 +50,10 @@ export function Navigation() {
         <NavigationContainer>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {isLoggedIn ? (
+                    <>
                     <Stack.Screen name="MainTabs" component={MyTabs} />
+                    <Stack.Screen name="AddFarm" component={AddFarmScreen} />
+                    </>
                 ) : (
                     <>
                         <Stack.Screen name="Login" component={AuthScreen} />
