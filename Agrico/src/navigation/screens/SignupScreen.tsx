@@ -67,6 +67,7 @@ const SignupScreen = ( ) => {
 
     return (
         <View style={styles.container}>
+            <Text style={styles.title}>Agrico</Text>
             <Text style={styles.title}>Farm Management SignUp</Text>
 
             <TextInput
