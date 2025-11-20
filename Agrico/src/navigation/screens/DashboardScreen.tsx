@@ -1,13 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { View, Text, Button, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import ApiManager from '../../api/ApiManager';
+import {AuthContext} from "../AuthContext";
 
 const DashboardScreen = ({ navigation }: { navigation: any }) => {
     const [data, setData] = useState({ livestock: 0, crops: 0, sales: 0, expenses: 0 });
     const [loading, setLoading] = useState(true);
     const [hasFarms, setHasFarms] = useState(true);
-
+    const { farmId } = useContext(AuthContext);
+    const {logout} = useContext(AuthContext);
     const loadData = async () => {
         setLoading(true);
         try {
@@ -50,7 +52,8 @@ const DashboardScreen = ({ navigation }: { navigation: any }) => {
 
     const handleLogout = async () => {
         await AsyncStorage.removeItem('AccessToken');
-        navigation.replace('Auth');
+        // navigation.navigate('Login');
+        logout()
     };
 
     if (loading) return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />;

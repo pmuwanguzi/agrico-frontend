@@ -14,8 +14,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { AuthContext } from "../AuthContext";
 import { getCrops, createCrop, updateCrop, deleteCrop } from "../../api/ApiFunctions";
-
-const farm_id = 1; // Replace with dynamic farm ID if needed
+import { getFarms } from "../../api/ApiFunctions";
 
 const CropsScreen = () => {
     const [cropList, setCropList] = useState<any[]>([]);
@@ -27,29 +26,46 @@ const CropsScreen = () => {
     const [editName, setEditName] = useState("");
     const [editQty, setEditQty] = useState("");
 
+    const [farmId, setFarmId] = useState<number | null>(null);
     const { logout } = useContext(AuthContext);
     const navigation = useNavigation();
 
-    // Fetch crops
-    const fetchCropsData = async () => {
+
+    const fetchFarmAndCrops = async () => {
         setLoading(true);
         try {
-            const token = await AsyncStorage.getItem("AccessToken");
-            if (!token) throw new Error("Missing auth token");
-            const data = await getCrops(token);
-            setCropList(data);
+            const farms = await getFarms();
+            if (farms.length === 0) {
+                setLoading(false);
+                navigation.navigate("AddFarm"); // Auto-redirect
+                return;
+            }
+
+            const firstFarmId = farms[0].farm_id;
+            setFarmId(firstFarmId);
+
+            const crops = await getCrops();
+            const farmCrops = crops.filter(c => c.farm_id === firstFarmId);
+            setCropList(farmCrops);
         } catch (err: any) {
-            console.error("Fetch Crops Error:", err.response?.data || err.message);
-            Alert.alert("Error", "Failed to fetch crops.");
+            console.error("Fetch Farm/Crops Error:", err.response?.data || err.message);
+            Alert.alert("Error", "Failed to fetch crops or farms.");
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => { fetchCropsData(); }, []);
+    useEffect(() => {
+        fetchFarmAndCrops();
+    }, []);
 
     // Add new crop
     const handleAdd = async () => {
+        if (!farmId) {
+            Alert.alert("Error", "You must have a farm to add crops.");
+            return;
+        }
+
         const quantityNum = Number(qty);
         if (!name || !qty) {
             Alert.alert("Error", "Please enter crop name and quantity");
@@ -61,17 +77,15 @@ const CropsScreen = () => {
         }
 
         try {
-            const token = await AsyncStorage.getItem("AccessToken");
-            if (!token) throw new Error("Missing auth token");
             const res = await createCrop({
-                farm_id,
+                farm_id: farmId,
                 crop_name: name,
                 expected_yield: quantityNum,
                 crop_type: "unknown",
                 planting_date: null,
                 harvest_date: null
-            }, token);
-            setCropList([...cropList, { crop_id: res.crop_id, crop_name: name, expected_yield: quantityNum }]);
+            });
+            setCropList([...cropList, { crop_id: res.crop_id, farm_id: farmId, crop_name: name, expected_yield: quantityNum }]);
             setName("");
             setQty("");
         } catch (err: any) {
@@ -94,9 +108,7 @@ const CropsScreen = () => {
         }
 
         try {
-            const token = await AsyncStorage.getItem("AccessToken");
-            if (!token) throw new Error("Missing auth token");
-            await updateCrop(editItem.crop_id, { crop_name: editName, expected_yield: quantityNum }, token);
+            await updateCrop(editItem.crop_id, { crop_name: editName, expected_yield: quantityNum });
             setCropList(cropList.map(c => c.crop_id === editItem.crop_id ? { ...c, crop_name: editName, expected_yield: quantityNum } : c));
             setEditItem(null);
         } catch (err: any) {
@@ -108,9 +120,7 @@ const CropsScreen = () => {
     // Delete crop
     const handleDelete = async (id: number) => {
         try {
-            const token = await AsyncStorage.getItem("AccessToken");
-            if (!token) throw new Error("Missing auth token");
-            await deleteCrop(id, token);
+            await deleteCrop(id);
             setCropList(cropList.filter(c => c.crop_id !== id));
         } catch (err: any) {
             console.error("Delete Crop Error:", err.response?.data || err.message);
@@ -125,9 +135,6 @@ const CropsScreen = () => {
                 <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
                     <Text style={{ color: "#007bff", fontWeight: "600" }}>Back to Dashboard</Text>
                 </TouchableOpacity>
-                {/*<TouchableOpacity onPress={logout}>*/}
-                {/*    <Text style={{ color: "red", fontWeight: "600" }}>Logout</Text>*/}
-                {/*</TouchableOpacity>*/}
             </View>
 
             {loading && <ActivityIndicator size="large" color="#007bff" />}

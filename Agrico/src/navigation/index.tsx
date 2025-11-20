@@ -57,7 +57,7 @@ export function Navigation() {
                 ) : (
                     <>
                         <Stack.Screen name="Login" component={AuthScreen} />
-                        <Stack.Screen name="SignupScreen" component={SignupScreen} options={{headerShown: true}} />
+                        <Stack.Screen name="SignUp" component={SignupScreen} options={{headerShown: true}} />
                     </>
                 )}
                 <Stack.Screen name="NotFound" component={NotFound} />

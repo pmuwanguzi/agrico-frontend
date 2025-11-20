@@ -1,164 +1,226 @@
-import React, { useState, useEffect, useContext } from "react";
-
+import React, { useEffect, useState, useContext } from "react";
+import { AuthContext } from "../AuthContext";
 import {
     View,
     Text,
     TextInput,
     TouchableOpacity,
-    FlatList,
-    Modal,
-    StyleSheet,
     ActivityIndicator,
+    FlatList,
+    StyleSheet,
     Alert,
 } from "react-native";
-import { AuthContext } from "../AuthContext";
-import { getExpenses, createExpense, updateExpense, deleteExpense } from "../../api/ApiFunctions";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getExpenses, createExpense } from "../../api/ApiFunctions";
 
-const farm_id = 1; // replace with dynamic farm id
+export default function ExpensesScreen() {
+    const navigation = useNavigation();
+    const { farmId, logout } = useContext(AuthContext);
 
-const ExpensesScreen = ({ navigation }: { navigation: any }) => {
-    const { logout } = useContext(AuthContext);
-
-    const [expenses, setExpenses] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-
-    const [description, setDescription] = useState("");
     const [amount, setAmount] = useState("");
+    const [description, setDescription] = useState("");
+    const [date, setDate] = useState("");
+    const [expenses, setExpenses] = useState<any[]>([]);
+    const [totalExpenses, setTotalExpenses] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [creating, setCreating] = useState(false);
 
-    const [editItem, setEditItem] = useState<any>(null);
-    const [editDescription, setEditDescription] = useState("");
-    const [editAmount, setEditAmount] = useState("");
+    // ---------------- CHECK FARM ----------------
+    useEffect(() => {
+        if (!farmId) {
 
-    // Fetch expenses
-    const fetchExpensesData = async () => {
-        setLoading(true);
+            navigation.navigate("AddFarm");
+            return;
+        }
+        loadExpenses();
+    }, [farmId]);
+
+    // ---------------- FETCH EXPENSES ----------------
+    const loadExpenses = async () => {
+        if (!farmId) return; // prevent fetching without farm
         try {
-            const data = await getExpenses(farm_id);
-            setExpenses(data);
-        } catch (err: any) {
-            console.error("Fetch Expenses Error:", err.response?.data || err.message);
-            Alert.alert("Error", "Failed to fetch expenses.");
+            setLoading(true);
+            const token = await AsyncStorage.getItem("AccessToken");
+            if (!token) throw new Error("Missing auth token");
+            const data = await getExpenses(farmId, token);
+
+            setExpenses(data.expenses || []);
+            setTotalExpenses(data.total_expenses || 0);
+        } catch (err) {
+            console.log("Fetch error:", err);
+            Alert.alert("Error", "Failed to load expenses.");
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        const unsubscribe = navigation.addListener("focus", fetchExpensesData);
-        return unsubscribe;
-    }, [navigation]);
+    // ---------------- CREATE EXPENSE ----------------
+    const handleCreateExpense = async () => {
+        if (!farmId) {
+            Alert.alert("No Farm Found", "You must create a farm first.", [
+                { text: "OK", onPress: () => navigation.navigate("AddFarm") },
+            ]);
+            return;
+        }
+        if (!amount.trim()) {
+            Alert.alert("Validation", "Amount is required.");
+            return;
+        }
 
-    // Add new expense
-    const handleAdd = async () => {
-        if (!description || !amount) return Alert.alert("Error", "Please fill in all fields.");
         try {
-            const newExpense = await createExpense({ farm_id, description, amount: Number(amount) });
-            setExpenses([...expenses, newExpense.expense]);
-            setDescription("");
+            setCreating(true);
+            const token = await AsyncStorage.getItem("AccessToken");
+            if (!token) throw new Error("Missing auth token");
+
+            const payload = {
+                farm_id: farmId,
+                amount: Number(amount),
+                description,
+                date: date || undefined,
+            };
+
+            await createExpense(payload, token);
+
+            Alert.alert("Success", "Expense created!");
+
             setAmount("");
+            setDescription("");
+            setDate("");
+
+            loadExpenses();
         } catch (err: any) {
-            console.error("Add Expense Error:", err.response?.data || err.message);
-            Alert.alert("Error", "Failed to add expense.");
+            console.log("Create expense error:", err.response?.data || err);
+            Alert.alert("Error", err.response?.data?.error || "Failed to create expense");
+        } finally {
+            setCreating(false);
         }
     };
 
-    // Edit expense
-    const handleEdit = async () => {
-        if (!editItem) return;
-        try {
-            const updated = await updateExpense(editItem.id, { description: editDescription, amount: Number(editAmount) });
-            setExpenses(expenses.map(e => e.id === editItem.id ? updated.expense : e));
-            setEditItem(null);
-        } catch (err: any) {
-            console.error("Update Expense Error:", err.response?.data || err.message);
-            Alert.alert("Error", "Failed to update expense.");
-        }
-    };
+    // ---------------- RENDER ----------------
+    const renderItem = ({ item }) => (
+        <View style={styles.expenseItem}>
+            <Text style={styles.expenseText}>
+                <Text style={styles.bold}>Amount:</Text> {item.amount}
+            </Text>
+            <Text style={styles.expenseText}>
+                <Text style={styles.bold}>Description:</Text> {item.description || "No description"}
+            </Text>
+            <Text style={styles.expenseText}>
+                <Text style={styles.bold}>Date:</Text> {item.date}
+            </Text>
+        </View>
+    );
 
-    // Delete expense
-    const handleDelete = async (id: number) => {
-        try {
-            await deleteExpense(id);
-            setExpenses(expenses.filter(e => e.id !== id));
-        } catch (err: any) {
-            console.error("Delete Expense Error:", err.response?.data || err.message);
-            Alert.alert("Error", "Failed to delete expense.");
-        }
-    };
+    // Don't render the screen if farmId doesn't exist
+    if (!farmId) return null;
 
     return (
-        <View style={{ flex: 1, padding: 20 }}>
-            {/* Header with Back & Logout */}
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 15 }}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Text style={{ color: "blue", fontWeight: "600" }}>Back</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={logout}>
-                    <Text style={{ color: "red", fontWeight: "600" }}>Logout</Text>
+        <View style={styles.container}>
+            {/* Header */}
+            <View style={styles.header}>
+                {/*<TouchableOpacity onPress={() => navigation.goBack()}>*/}
+                {/*    <Text style={styles.backButton}>⬅ Back</Text>*/}
+                {/*</TouchableOpacity>*/}
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 20 }}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+                        <Text style={{ color: "#007bff", fontWeight: "600" }}>Back to Dashboard</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/*<TouchableOpacity onPress={logout}>*/}
+                {/*    <Text style={styles.logoutButton}>Logout</Text>*/}
+                {/*</TouchableOpacity>*/}
+            </View>
+
+            <Text style={styles.title}>Expenses for Farm #{farmId}</Text>
+
+            {/* Total Expenses */}
+            <Text style={styles.total}>Total Expenses: {totalExpenses}</Text>
+
+            {/* Create expense form */}
+            <View style={styles.form}>
+                <TextInput
+                    placeholder="Amount"
+                    style={styles.input}
+                    keyboardType="numeric"
+                    value={amount}
+                    onChangeText={setAmount}
+                />
+                <TextInput
+                    placeholder="Description"
+                    style={styles.input}
+                    value={description}
+                    onChangeText={setDescription}
+                />
+                <TextInput
+                    placeholder="Date (YYYY-MM-DD) - optional"
+                    style={styles.input}
+                    value={date}
+                    onChangeText={setDate}
+                />
+
+                <TouchableOpacity
+                    style={styles.createButton}
+                    onPress={handleCreateExpense}
+                    disabled={creating}
+                >
+                    <Text style={styles.createButtonText}>
+                        {creating ? "Saving..." : "Add Expense"}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.header}>Expenses</Text>
+            {/* Expense list */}
+            <Text style={styles.subtitle}>Expense History</Text>
 
-            {loading && <ActivityIndicator size="large" color="#007bff" />}
-
-            {/* Add Expense Inputs */}
-            <TextInput placeholder="Description" style={styles.input} value={description} onChangeText={setDescription} />
-            <TextInput placeholder="Amount" keyboardType="numeric" style={styles.input} value={amount} onChangeText={setAmount} />
-            <TouchableOpacity style={styles.button} onPress={handleAdd}>
-                <Text style={styles.buttonText}>Add Expense</Text>
-            </TouchableOpacity>
-
-            {/* Expenses List */}
-            <FlatList
-                data={expenses}
-                keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item }) => (
-                    <View style={styles.listItem}>
-                        <Text>${item.amount} - {item.description}</Text>
-                        <View style={{ flexDirection: "row" }}>
-                            <TouchableOpacity onPress={() => { setEditItem(item); setEditDescription(item.description); setEditAmount(String(item.amount)); }}>
-                                <Text style={styles.editBtn}>Edit</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                                <Text style={styles.deleteBtn}>Delete</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                )}
-            />
-
-            {/* Edit Modal */}
-            <Modal visible={!!editItem} transparent animationType="slide">
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalBox}>
-                        <Text style={styles.modalTitle}>Edit Expense</Text>
-                        <TextInput style={styles.input} value={editDescription} onChangeText={setEditDescription} />
-                        <TextInput style={styles.input} keyboardType="numeric" value={editAmount} onChangeText={setEditAmount} />
-                        <TouchableOpacity style={styles.button} onPress={handleEdit}>
-                            <Text style={styles.buttonText}>Save</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setEditItem(null)}>
-                            <Text style={{ color: "red", marginTop: 10, textAlign: "center" }}>Cancel</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+            {loading ? (
+                <ActivityIndicator size="large" color="#2E8B57" />
+            ) : (
+                <FlatList
+                    data={expenses}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={renderItem}
+                    contentContainerStyle={{ paddingBottom: 50 }}
+                />
+            )}
         </View>
     );
-};
-
-export default ExpensesScreen;
+}
 
 const styles = StyleSheet.create({
-    header: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-    input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 12, marginBottom: 15 },
-    button: { backgroundColor: "#007bff", padding: 14, borderRadius: 8, alignItems: "center", marginBottom: 20 },
-    buttonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
-    listItem: { padding: 15, backgroundColor: "#f8f8f8", borderRadius: 8, marginBottom: 10, flexDirection: "row", justifyContent: "space-between" },
-    editBtn: { color: "blue", marginRight: 15 },
-    deleteBtn: { color: "red" },
-    modalContainer: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center" },
-    modalBox: { width: "80%", backgroundColor: "#fff", padding: 20, borderRadius: 10 },
-    modalTitle: { fontSize: 18, fontWeight: "600", textAlign: "center", marginBottom: 15 },
+    container: { flex: 1, padding: 16, backgroundColor: "#fff" },
+    header: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 20,
+    },
+    backButton: { fontSize: 18, color: "#2E8B57", fontWeight: "bold" },
+    logoutButton: { fontSize: 18, color: "red", fontWeight: "bold" },
+    title: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
+    total: { fontSize: 16, fontWeight: "600", color: "#2E8B57", marginBottom: 15 },
+    subtitle: { fontSize: 18, fontWeight: "bold", marginTop: 20, marginBottom: 10 },
+    form: { marginBottom: 20 },
+    input: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        padding: 10,
+        marginBottom: 10,
+        borderRadius: 8,
+    },
+    createButton: {
+        backgroundColor: "#2E8B57",
+        padding: 14,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    createButtonText: { color: "white", fontWeight: "bold" },
+    expenseItem: {
+        backgroundColor: "#F0F0F0",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 10,
+    },
+    expenseText: { fontSize: 14 },
+    bold: { fontWeight: "bold" },
 });
