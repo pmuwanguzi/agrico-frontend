@@ -19,6 +19,7 @@ import {
     getTotalSales,
     SalePayload,
 } from '../../api/ApiFunctions';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const SalesScreen = () => {
     const navigation = useNavigation();
@@ -30,9 +31,10 @@ const SalesScreen = () => {
     const [totalSales, setTotalSales] = useState(0);
 
     const [itemName, setItemName] = useState('');
-    const [quantity, setQuantity] = useState('');
-    const [unitPrice, setUnitPrice] = useState('');
+    const [quantity, setQuantity] = useState(0);
+    const [unitPrice, setUnitPrice] = useState(0);
     const [notes, setNotes] = useState('');
+    const [date, setDate] = useState('');
 
     const [editItem, setEditItem] = useState<any>(null);
     const [editItemName, setEditItemName] = useState('');
@@ -85,19 +87,22 @@ const SalesScreen = () => {
             item_name: itemName,
             quantity: Number(quantity),
             unit_price: Number(unitPrice),
-            // sale_date: sale_date || undefined,
-            notes: notes || undefined,
+            sale_date: date || undefined,
+            notes: notes || "",
         };
 
 
         try {
             setCreating(true);
+            // const token:string | null = await AsyncStorage.getItem("AccessToken");
             await createSale(payload);
             Alert.alert('Success', 'Sale added');
-            setItemName('');
-            setQuantity('');
-            setUnitPrice(unitPrice);
-            setNotes('');
+            setCreating(false);
+            setItemName("");
+            setQuantity(0 );
+            setUnitPrice(0 );
+            setNotes("");
+            // await console.log(payload);
             await loadSales();
             await loadTotalSales();
         } catch (err) {

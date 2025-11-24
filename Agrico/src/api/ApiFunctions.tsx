@@ -1,78 +1,4 @@
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-// import ApiManager from "./ApiManager";
-//
-// // Helper to get token from AsyncStorage
-// const getToken = async () => {
-//     const token = await AsyncStorage.getItem("AccessToken");
-//     if (!token) throw new Error("No auth token found");
-//     return token;
-// };
-//
-// // ------------------ LIVESTOCK ------------------
-// export const getLivestock = async (farm_id: number) => {
-//     const token = await getToken();
-//     const res = await ApiManager.get(`/livestock/${farm_id}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
-//
-// export const createLivestock = async (data: any) => {
-//     const token = await getToken();
-//     const res = await ApiManager.post(`/livestock/`, data, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
-//
-// export const updateLivestock = async (id: number, data: any) => {
-//     const token = await getToken();
-//     const res = await ApiManager.put(`/livestock/${id}`, data, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
-//
-// export const deleteLivestock = async (id: number) => {
-//     const token = await getToken();
-//     const res = await ApiManager.delete(`/livestock/${id}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
-//
-// // ------------------ CROPS ------------------
-// export const getCrops = async () => {
-//     const token = await getToken();
-//     const res = await ApiManager.get(`/crops/`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data.crops;
-// };
-//
-// export const createCrop = async (data: any) => {
-//     const token = await getToken();
-//     const res = await ApiManager.post(`/crops/`, data, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
-//
-// export const updateCrop = async (id: number, data: any) => {
-//     const token = await getToken();
-//     const res = await ApiManager.put(`/crops/${id}`, data, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
-//
-// export const deleteCrop = async (id: number) => {
-//     const token = await getToken();
-//     const res = await ApiManager.delete(`/crops/${id}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//     });
-//     return res.data;
-// };
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ApiManager from "./ApiManager";
 
@@ -86,19 +12,6 @@ const getToken = async () => {
 
 // ------------------ LIVESTOCK ------------------
 
-// Get all livestock for farms of the logged-in user
-// export const getLivestock = async () => {
-//     const token = await getToken();
-//     try {
-//         const res = await ApiManager.get("/livestock/", {
-//             headers: { Authorization: `Bearer ${token}` },
-//         });
-//         return res.data; // array of livestock
-//     } catch (error: any) {
-//         console.error("Get Livestock Error:", error.response?.data || error.message);
-//         throw error;
-//     }
-// };
 /**
  * Fetch all livestock for the logged-in user's farms.
  * @returns Array of livestock objects.
@@ -123,8 +36,8 @@ export const createLivestock = async (data: {
     farm_id: number;
     animal_type: string;
     quantity: number;
-    purchase_date?: string;
-    health_status?: string;
+    purchase_date: string;
+    health_status: string;
 }) => {
     const token = await getToken();
     try {
@@ -251,7 +164,6 @@ export const deleteCrop = async (crop_id: number) => {
 
 // ------------------ EXPENSES ------------------
 
-
 interface ExpenseData {
     farm_id: number;
     amount: number;
@@ -371,9 +283,10 @@ export const deleteFarm = async (farm_id: number) => {
 };
 
 //---------------- SALES ------------------
-import api from "./ApiManager"; // Axios instance with token interceptor
+// import api from "./ApiManager"; // Axios instance with token interceptor
 
 export interface SalePayload {
+    farm_id:number;
     item_name: string;
     quantity: number;
     unit_price: number;
@@ -382,26 +295,34 @@ export interface SalePayload {
 }
 
 // ---------------- CREATE SALE ----------------
+
 export const createSale = async (payload: SalePayload) => {
-    const response = await api.post("/sales/", payload);
+    const token = await getToken();
+    const response = await ApiManager.post("/sales", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data.sale;
 };
 
 // ---------------- GET ALL SALES ----------------
 export const getSales = async () => {
-    const response = await api.get("/sales/");
+    const token = await getToken();
+    const response = await ApiManager.get("/sales/farm/<int:farm_id>",{
+        headers:{Authorization: `Bearer ${token}`},
+    });
+    console.log(response.data);
     return response.data; // array of sales
 };
 
 // ---------------- UPDATE SALE ----------------
 export const updateSale = async (sale_id: number, payload: Partial<SalePayload>) => {
-    const response = await api.put(`/sales/${sale_id}`, payload);
+    const response = await ApiManager.put(`/sales/${sale_id}`, payload);
     return response.data.sale;
 };
 
 // ---------------- DELETE SALE ----------------
 export const deleteSale = async (sale_id: number) => {
-    const response = await api.delete(`/sales/${sale_id}`);
+    const response = await ApiManager.delete(`/sales/${sale_id}`);
     return response.data.message;
 };
 
@@ -411,6 +332,6 @@ export const getTotalSales = async (start_date?: string, end_date?: string) => {
     if (start_date || end_date) {
         query = `?${start_date ? "start_date=" + start_date : ""}${start_date && end_date ? "&" : ""}${end_date ? "end_date=" + end_date : ""}`;
     }
-    const response = await api.get(`/sales/total${query}`);
+    const response = await ApiManager.get(`/sales/total${query}`);
     return response.data.total_sales;
 };

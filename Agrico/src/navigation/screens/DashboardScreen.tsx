@@ -33,8 +33,10 @@ const DashboardScreen = ({ navigation }: { navigation: any }) => {
             const statsResponse = await ApiManager.get('/dashboard/', { // you need to create this endpoint
                 headers: { Authorization: `Bearer ${token}` },
             });
+            console.log(statsResponse.data)
 
             setData(statsResponse.data);
+            // console.log(data)
         } catch (error: any) {
             console.log('Dashboard fetch error:', error.response?.data || error.message);
             Alert.alert('Error', 'Failed to fetch dashboard data.');
@@ -78,23 +80,23 @@ const DashboardScreen = ({ navigation }: { navigation: any }) => {
 
             <View style={styles.summaryRow}>
                 <View style={styles.summaryBox}>
-                    <Text style={styles.summaryNumber}>{data.livestock}</Text>
+                    <Text style={styles.summaryNumber}>{data?.total_livestock ?? 0}</Text>
                     <Text>Livestock</Text>
                 </View>
                 <View style={styles.summaryBox}>
-                    <Text style={styles.summaryNumber}>{data.crops}</Text>
-                    <Text>Crops</Text>
+                    <Text style={styles.summaryNumber}>{data?.total_crops ?? 0}</Text>
+                    <Text>Crop Types</Text>
                 </View>
             </View>
 
             <View style={styles.summaryRow}>
                 <View style={styles.summaryBox}>
-                    <Text style={styles.summaryNumber}>RWF {data.sales}</Text>
+                    <Text style={styles.summaryNumber}>{data?.total_sales ?? 0}</Text>
                     <Text>Current Sales</Text>
                 </View>
                 <View style={styles.summaryBox}>
-                    <Text style={styles.summaryNumber}>RWF {data.expenses}</Text>
-                    <Text>Current Expenses</Text>
+                    <Text style={styles.summaryNumber}> {data?.total_expenses ?? 0}</Text>
+                    <Text>Current Expenses(RWF)</Text>
                 </View>
             </View>
 

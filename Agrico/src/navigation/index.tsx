@@ -16,6 +16,7 @@ import CropsScreen from "./screens/CropsScreen";
 import SalesScreen from "./screens/SalesScreen";
 import ExpensesScreen from "./screens/ExpensesScreen";
 import AddFarmScreen from "./screens/AddFarmScreen";
+import ReportsAndAnalytics from "./screens/ReportsAndAnalytics";
 
 
 const Tabs = createBottomTabNavigator();
@@ -37,6 +38,7 @@ function MyTabs() {
             <Tabs.Screen name="Crops" component={CropsScreen} />
             <Tabs.Screen name="Sales" component={SalesScreen} />
             <Tabs.Screen name="Expenses" component={ExpensesScreen} />
+            {/*<Tabs.Screen name="ReportsAnalytics" component={ReportsAndAnalytics} />*/}
         </Tabs.Navigator>
     );
 }
@@ -53,6 +55,7 @@ export function Navigation() {
                     <>
                     <Stack.Screen name="MainTabs" component={MyTabs} />
                     <Stack.Screen name="AddFarm" component={AddFarmScreen} />
+                    <Stack.Screen name="ReportsAnalytics" component={ReportsAndAnalytics} />
                     </>
                 ) : (
                     <>
