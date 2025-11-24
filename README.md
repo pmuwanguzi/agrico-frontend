@@ -4,7 +4,7 @@ Frontend for the Agrico App
 
 
 After cloning the repo, 
-cd into agrico-frontend
+cd into agrico-frontend / Agrico
 run `npm install`
 Then run `npx expo start`
 
